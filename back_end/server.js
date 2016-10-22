@@ -34,16 +34,15 @@ stockfish.on('error', (code) => {
 
 app.get('/', function (req, res) {
     pos_finished = "---";
-    position = req.query.pos;
-    out('position fen ' + position);
-    out('go');
-    
-    var _check = setInterval(function(){
-        if (position === pos_finished){
-            clearInterval(_check);
+    position = JSON.parse(req.query.moves).toString().replace(/,/g, " ");
+    out('position startpos moves ' + position);
+
+    setTimeout(function(){
+        out('go movetime 2800');
+        setTimeout(function(){
             res.send(move);
-        }
-    }, 100);
+        }, 3000)
+    }, 100)
 });
 
 app.listen(3000, function () {
