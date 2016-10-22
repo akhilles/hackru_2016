@@ -1,0 +1,11 @@
+{
+  "name": "ultimate_chess_hack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "author": "Akhil Velagapudi",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}
