@@ -14,8 +14,10 @@ stockfish.stdout.on('data', (data) => {
         out('isready');
     } else if (data.indexOf('bestmove') !== -1) {
         move = data.toString().substring(data.indexOf('bestmove') + 9);
+        if (move.indexOf(' ') != -1){
+            move = move.substring(0, move.indexOf(' '));
+        }
         console.log('out: ' + move);
-        move = move.substring(0, move.indexOf(' '));
         pos_finished = position;
     }
 });
@@ -34,13 +36,15 @@ stockfish.on('error', (code) => {
 
 app.get('/', function (req, res) {
     pos_finished = "---";
+    move = "---";
     position = JSON.parse(req.query.moves).toString().replace(/,/g, " ");
     out('position startpos moves ' + position);
 
     setTimeout(function(){
-        out('go movetime 2800');
+        out('go movetime 2900');
         setTimeout(function(){
-            res.send(move);
+            res.write(move);
+            res.end();
         }, 3000)
     }, 100)
 });
