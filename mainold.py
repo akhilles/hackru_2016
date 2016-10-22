@@ -1,6 +1,21 @@
 import cv2
 import copy
 import numpy as np
+#from skimage import io, img_as_float
+
+def pValues(img):
+        w = 8
+        h = 8
+        mat = [[0 for x in range(w)] for y in range(h)]
+        for x in range(0,7):
+                print "\n"
+                for y in range(0,7):
+                        img1 = img[80*x:80*(x+1),80*y:80*(y+1)]
+                        #img1 = img_as_float(img1)
+                        mat[x,y] = img1.mean()
+                        print mat[x,y]
+        return mat
+
 
 def rectify(h):
         h = h.reshape((4,2))
@@ -67,6 +82,7 @@ while(True):
     retval = cv2.getPerspectiveTransform(approxW,h)
     warp2 = cv2.warpPerspective(warp,retval,(450,450))
     cv2.imshow('warp2',warp2)
+    pValues(warp2)
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break

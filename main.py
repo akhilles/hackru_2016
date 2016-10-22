@@ -5,6 +5,19 @@ import numpy as np
 warped = False
 retval = None
 
+
+def pValues(img):
+w = 8
+h = 8
+mat = [[0 for x in range(w)] for y in range(h)]
+        for x in range(0,7)
+        print "\n"
+                for y in range(0,7)
+                        mat[x,y] = np.mean(img[80*x:80*(x+1), 80*y:80*(y+1)])
+                        print mat[x,y]
+              
+        return mat
+
 def rectify(h):
         h = h.reshape((4,2))
         hnew = np.zeros((4,2),dtype = np.float32)
@@ -56,7 +69,7 @@ while(True):
             _, contours, _= cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             biggest = biggestContour(contours)
             approx = rectify(biggest)
-            h = np.array([ [0,0],[449,0],[449,449],[0,449] ],np.float32)
+            h = np.array([ [0,0],[639,0],[639,639],[0,639] ],np.float32)
             retval = cv2.getPerspectiveTransform(approx,h)
             warp = cv2.warpPerspective(gray,retval,(450,450))
             cv2.imshow('warp',warp)
