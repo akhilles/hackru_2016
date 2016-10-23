@@ -5,10 +5,10 @@ state = -1
 class State:
     initial, corners_detected, tracking_state = range(3)
 
-w = 8
-h = 8
-
-def initialize(matrix):
+def initial_board():
+    w = 8
+    h = 8
+    matrix = [[0 for x in range(w)] for y in range(h)]
     for f in range(0,8):
         for r in range(0,2):
             matrix[r][f] = 1
@@ -67,11 +67,8 @@ def send_move_list(move_list):
     r = requests.get(url, params)
     print 'recieved suggested move: ' + r.text
 
-Matrix1 = [[0 for x in range(w)] for y in range(h)]
-Matrix2 = [[0 for x in range(w)] for y in range(h)]
-
-Matrix1 = initialize(Matrix1)
-Matrix2 = initialize(Matrix2)
+Matrix1 = initial_board()
+Matrix2 = initial_board()
 
 Matrix2[1][5] = 0
 Matrix2[3][5] = 1

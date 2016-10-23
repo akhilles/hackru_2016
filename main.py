@@ -7,6 +7,23 @@ numFramesStill = 0
 prevFrame = None
 warped = False
 retval = None
+gameStarted = False
+
+def getBoardOccupancy(pValues):
+        w = 8
+        h = 8
+        mat = [[0 for x in range(w)] for y in range(h)]
+        for x in range(0,8):
+                for y in range(0,8):
+                        #difference_sum = 0
+                        difference_sum = abs(pValues[x][y][2] - default_matrix[x][y][2])
+                        #for i in range(0,3):
+                                #difference_sum = difference_sum + pValues[x][y][i] - default_matrix[x][y][i]
+                        if (difference_sum < 8):
+                                mat[x][y] = 0
+                        else:
+                                mat[x][y] = 1
+        return mat
 
 def noChange(newFrame):
         sum1 = 0
@@ -14,7 +31,7 @@ def noChange(newFrame):
                 for y in range(0,8):
                         for i in range(0,3):
                                 sum1 = sum1+abs(newFrame[x][y][i]-prevFrame[x][y][i])
-        print sum1
+        #print sum1
         return sum1
 
 
@@ -31,12 +48,23 @@ def pValues(img):
                 
                 for y in range(0,8):
                         tot = [0,0,0]
-                        for i in range(20,59):
-                                for j in range(20,59):
+                        for i in range(15,64):
+                                for j in range(15,64):
                                         tot = tot+ img[80*x+i,80*y+j]
-                        mat[x][y] = (tot[0]/(40*40),tot[1]/(40*40),tot[2]/(40*40))
+                        mat[x][y] = (tot[0]/(50*50),tot[1]/(50*50),tot[2]/(50*50))
         #print_board(mat)
         return mat
+
+def initial_board():
+    w = 8
+    h = 8
+    matrix = [[0 for x in range(w)] for y in range(h)]
+    for f in range(0,8):
+        for r in range(0,2):
+            matrix[r][f] = 1
+        for r_b in range(6,8):
+            matrix[r_bq][f] = 1
+    return matrix
 
 def rectify(h):
         h = h.reshape((4,2))
@@ -83,11 +111,16 @@ while(True):
         mat1 = pValues(warp)
         if(prevFrame != None):
                 if(noChange(mat1) <500):
+                        occupancy = getBoardOccupancy(mat1)
+                        print_board(occupancy)
                         numFramesStill = numFramesStill+1
                 else:
                         numFramesStill = 0
         prevFrame =mat1
-        ##if (numFramesStill >= 10)
+        
+        #if (numFramesStill >= 10):
+                #if (gameStarted == False):
+
                 
     
     if cv2.waitKey(1) & 0xFF == ord('f'):
