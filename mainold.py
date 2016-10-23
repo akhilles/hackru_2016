@@ -31,9 +31,9 @@ def pp2(img):
                 
                 for y in range(0,8):
                         tot = [0,0,0]
-                        for i in range(20,59):
-                                for j in range(20,59):
-                                        tot = tot+ img[80*x+i,80*y+j]
+                        for i in range(0,39):
+                                for j in range(0,39):
+                                        tot = tot+ img[40*x+i,40*y+j]
                         mat[x][y] = (tot[0]/(40*40),tot[1]/(40*40),tot[2]/(40*40))
         print_board(mat)
         return mat
@@ -86,9 +86,10 @@ while(True):
     cv2.imshow('frame2',gray)
     cv2.imshow('Contours',threshC)
     approx = rectify(biggest)
-    h = np.array([ [0,0],[639,0],[639,639],[0,639] ],np.float32)
+    h = np.array([ [0,0],[319,0],[319,319],[0,319] ],np.float32)
     retval = cv2.getPerspectiveTransform(approx,h)
-    warp = cv2.warpPerspective(img,retval,(640,640))
+    warp = cv2.warpPerspective(img,retval,(320,320))
+
     cv2.imshow('warp',warp)
 
     pp2(warp)

@@ -1,4 +1,5 @@
 import cv2
+import time 
 import copy
 import numpy as np
 global default_matrix
@@ -17,6 +18,7 @@ def getBoardOccupancy(pValues):
                 for y in range(0,8):
                         #difference_sum = 0
                         difference_sum = abs(pValues[x][y][2] - default_matrix[x][y][2])
+                        print(difference_sum)
                         #for i in range(0,3):
                                 #difference_sum = difference_sum + pValues[x][y][i] - default_matrix[x][y][i]
                         if (difference_sum < 8):
@@ -48,10 +50,10 @@ def pValues(img):
                 
                 for y in range(0,8):
                         tot = [0,0,0]
-                        for i in range(15,64):
-                                for j in range(15,64):
-                                        tot = tot+ img[80*x+i,80*y+j]
-                        mat[x][y] = (tot[0]/(50*50),tot[1]/(50*50),tot[2]/(50*50))
+                        for i in range(5,34):
+                                for j in range(5,34):
+                                        tot = tot+ img[40*x+i,40*y+j]
+                        mat[x][y] = (tot[0]/(30*30),tot[1]/(30*30),tot[2]/(30*30))
         #print_board(mat)
         return mat
 
@@ -90,7 +92,7 @@ def biggestContour(c):
                 approx = cv2.approxPolyDP(i,0.02*peri,True)
                 if area > max_area and len(approx)==4:
                         #approx = rectify(approx)
-                        sBiggest = biggest
+                        #sBiggest = biggest
                         biggest = approx
                         max_area = area
     return biggest
@@ -99,6 +101,7 @@ def biggestContour(c):
 cap = cv2.VideoCapture("http://172.27.99.231:8080/video")
 while(True):
     #img =  cv2.imread('chessboard2.jpg')
+    #time.sleep(.1)
     ret, img =  cap.read()
 
     if ret==True and warped==False:
@@ -106,13 +109,15 @@ while(True):
         cv2.imshow('frame',img)
 
     if ret==True and warped==True:
-        warp = cv2.warpPerspective(img,retval,(640,640))
+        warp = cv2.warpPerspective(img,retval,(320,320))
         cv2.imshow('frame',warp)
         mat1 = pValues(warp)
         if(prevFrame != None):
-                if(noChange(mat1) <500):
+                if(numFramesStill > 20):
                         occupancy = getBoardOccupancy(mat1)
                         print_board(occupancy)
+                        numFramesStill = 0
+                if(noChange(mat1) <500):
                         numFramesStill = numFramesStill+1
                 else:
                         numFramesStill = 0
@@ -132,9 +137,9 @@ while(True):
             _, contours, _= cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             biggest = biggestContour(contours)
             approx = rectify(biggest)
-            h = np.array([ [0,0],[639,0],[639,639],[0,639] ],np.float32)
+            h = np.array([ [0,0],[319,0],[319,319],[0,319] ],np.float32)
             retval = cv2.getPerspectiveTransform(approx,h)
-            warp = cv2.warpPerspective(img,retval,(640,640))
+            warp = cv2.warpPerspective(img,retval,(320,320))
             cv2.imshow('warp',warp)
             warped = True
             default_matrix = pValues(warp)
