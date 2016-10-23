@@ -5,10 +5,58 @@ import numpy as np
 global default_matrix
 numFramesStill = 0
 
+moveList = []
+prevOccupancy = None
 prevFrame = None
 warped = False
 retval = None
 gameStarted = False
+
+def get_differences(matrix_old, matrix_new):
+    differences = []
+    for rank in range(0,8):
+        for filee in range(0,8):
+            if (matrix_old[rank][filee] != matrix_new[rank][filee]):
+                differences.append((rank, filee))
+    return differences
+
+def to_fen_notation(move):
+    f_old = chr(ord('a') + move[0][1])
+    r_old = str(move[0][0] + 1)
+    f_new = chr(ord('a') + move[1][1])
+    r_new = str(move[1][0] + 1)
+    return f_old + r_old + f_new + r_new
+
+def get_move(matrix_old, matrix_new):
+    differences = get_differences(matrix_old, matrix_new)
+    length = len(differences)
+    if (length == 2):
+        if (matrix_new[differences[0][0]][differences[0][1]] != 0):
+            return to_fen_notation((differences[1],differences[0]))
+        else:
+            return to_fen_notation((differences[0],differences[1]))
+    elif (length == 3):
+        start = None
+        end = None
+        for difference in differences:
+            if (matrix_new[difference[0]][difference[1]] != 0): end = difference
+        for difference in differences:
+            if (end[0] != difference[0] and end[1] != difference[1]): start = difference
+        return to_fen_notation((start,end))
+    elif (length == 4):
+        if ((0,7) in differences): return 'e1g1'
+        elif ((0,0) in differences): return 'e1c1'
+        elif ((7,7) in differences): return 'e8g8'
+        elif ((7,0) in differences): return 'e8c8'
+        else: return '???'
+    return '???'
+
+def send_move_list(move_list):
+    print 'sending move list to server'
+    params = [('moves',str(move_list).replace("'", '"').replace(" ",""))]
+    url = 'http://172.27.165.50:3000/'
+    r = requests.get(url, params)
+    print 'recieved suggested move: ' + r.text
 
 def getBoardOccupancy(pValues):
         w = 8
@@ -113,20 +161,23 @@ while(True):
         cv2.imshow('frame',warp)
         mat1 = pValues(warp)
         if(prevFrame != None):
-                if(numFramesStill > 20):
-                        occupancy = getBoardOccupancy(mat1)
-                        print_board(occupancy)
-                        numFramesStill = 0
                 if(noChange(mat1) <500):
                         numFramesStill = numFramesStill+1
                 else:
                         numFramesStill = 0
         prevFrame =mat1
-        
-        #if (numFramesStill >= 10):
-                #if (gameStarted == False):
+        if(numFramesStill > 20):
+                occupancy = getBoardOccupancy(mat1)
+                if (prevOccupancy != None and prevOccupancy != occupancy):
+                        print_board(occupancy)
+                        if (gameStarted):
+                                move = get_move(prevOccupancy)
+                                print move
+                if (gameStarted == False and occupancy == initial_board()):
+                        gameStarted = True
+                numFramesStill = 0
+                prevOccupancy = occupancy
 
-                
     
     if cv2.waitKey(1) & 0xFF == ord('f'):
         if ret==True:
