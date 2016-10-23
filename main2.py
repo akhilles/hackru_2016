@@ -5,18 +5,15 @@ state = -1
 class State:
     initial, corners_detected, tracking_state = range(3)
 
-class Pieces:
-    empty, white, black = range(3)
-
 w = 8
 h = 8
 
 def initialize(matrix):
     for f in range(0,8):
         for r in range(0,2):
-            matrix[r][f] = Pieces.white
+            matrix[r][f] = 1
         for r_b in range(6,8):
-            matrix[r_b][f] = Pieces.black
+            matrix[r_b][f] = 1
     return matrix
 
 def print_board(matrix):
