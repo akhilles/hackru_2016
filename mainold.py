@@ -3,19 +3,40 @@ import copy
 import numpy as np
 #from skimage import io, img_as_float
 
+
+def print_board(matrix):
+    for rank in (matrix):
+        print rank
+    print
+    
 def pValues(img):
         w = 8
         h = 8
         mat = [[0 for x in range(w)] for y in range(h)]
-        for x in range(0,7):
-                print "\n"
-                for y in range(0,7):
+        for x in range(0,8):
+                
+                for y in range(0,8):
                         img1 = img[80*x:80*(x+1),80*y:80*(y+1)]
                         #img1 = img_as_float(img1)
                         mat[x,y] = img1.mean()
-                        print mat[x,y]
+
+        print_board(mat)
         return mat
 
+def pp2(img):
+        w = 8
+        h = 8
+        mat = [[0 for x in range(w)] for y in range(h)]
+        for x in range(0,8):
+                
+                for y in range(0,8):
+                        tot = [0,0,0]
+                        for i in range(20,59):
+                                for j in range(20,59):
+                                        tot = tot+ img[80*x+i,80*y+j]
+                        mat[x][y] = (tot[0]/(40*40),tot[1]/(40*40),tot[2]/(40*40))
+        print_board(mat)
+        return mat
 
 def rectify(h):
         h = h.reshape((4,2))
@@ -49,10 +70,10 @@ def biggestContour(c):
 
 #cap = cv2.VideoCapture("http://172.27.228.21:8080/video")
 while(True):
-    img =  cv2.imread('chessboard7.jpg')
+    img =  cv2.imread('pieces.jpg')
     #ret, img =  cap.read()
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    gray = cv2.GaussianBlur(gray,(5,5),0)
+    #gray = cv2.GaussianBlur(gray,(5,5),0)
     thresh = cv2.adaptiveThreshold(gray,255,1,1,11,2)
     #thresh = cv2.GaussianBlur(thresh,(5,5),0)
     threshC = copy.deepcopy(thresh)
@@ -65,24 +86,12 @@ while(True):
     cv2.imshow('frame2',gray)
     cv2.imshow('Contours',threshC)
     approx = rectify(biggest)
-    h = np.array([ [0,0],[449,0],[449,449],[0,449] ],np.float32)
+    h = np.array([ [0,0],[639,0],[639,639],[0,639] ],np.float32)
     retval = cv2.getPerspectiveTransform(approx,h)
-    warp = cv2.warpPerspective(gray,retval,(450,450))
+    warp = cv2.warpPerspective(img,retval,(640,640))
     cv2.imshow('warp',warp)
 
-
-    threshW =  cv2.adaptiveThreshold(warp,255,1,1,11,2)
-    #threshW = cv2.GaussianBlur(threshW,(5,5),0)
-    
-    _, contoursW, _= cv2.findContours(threshW, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-    biggestW = biggestContour(contoursW)
-    cv2.drawContours(threshW, biggestW,-1, (255,0,0), 3)
-    cv2.imshow('warp2',threshW)
-    approxW = rectify(biggestW)
-    retval = cv2.getPerspectiveTransform(approxW,h)
-    warp2 = cv2.warpPerspective(warp,retval,(450,450))
-    cv2.imshow('warp2',warp2)
-    pValues(warp2)
+    pp2(warp)
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
