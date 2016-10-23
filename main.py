@@ -1,21 +1,41 @@
 import cv2
 import copy
 import numpy as np
+global default_matrix
+numFramesStill = 0
 
+prevFrame = None
 warped = False
 retval = None
 
+def noChange(newFrame):
+        sum1 = 0
+        for x in range(0,8):
+                for y in range(0,8):
+                        for i in range(0,3):
+                                sum1 = sum1+abs(newFrame[x][y][i]-prevFrame[x][y][i])
+        print sum1
+        return sum1
 
+
+def print_board(matrix):
+    for rank in (matrix):
+        print rank
+    print
+    
 def pValues(img):
-w = 8
-h = 8
-mat = [[0 for x in range(w)] for y in range(h)]
-        for x in range(0,7)
-        print "\n"
-                for y in range(0,7)
-                        mat[x,y] = np.mean(img[80*x:80*(x+1), 80*y:80*(y+1)])
-                        print mat[x,y]
-              
+        w = 8
+        h = 8
+        mat = [[0 for x in range(w)] for y in range(h)]
+        for x in range(0,8):
+                
+                for y in range(0,8):
+                        tot = [0,0,0]
+                        for i in range(20,59):
+                                for j in range(20,59):
+                                        tot = tot+ img[80*x+i,80*y+j]
+                        mat[x][y] = (tot[0]/(40*40),tot[1]/(40*40),tot[2]/(40*40))
+        #print_board(mat)
         return mat
 
 def rectify(h):
@@ -54,11 +74,21 @@ while(True):
     ret, img =  cap.read()
 
     if ret==True and warped==False:
+        img = cv2.GaussianBlur(img,(5,5),0)
         cv2.imshow('frame',img)
 
     if ret==True and warped==True:
-        warp = cv2.warpPerspective(img,retval,(450,450))
+        warp = cv2.warpPerspective(img,retval,(640,640))
         cv2.imshow('frame',warp)
+        mat1 = pValues(warp)
+        if(prevFrame != None):
+                if(noChange(mat1) <500):
+                        numFramesStill = numFramesStill+1
+                else:
+                        numFramesStill = 0
+        prevFrame =mat1
+        ##if (numFramesStill >= 10)
+                
     
     if cv2.waitKey(1) & 0xFF == ord('f'):
         if ret==True:
@@ -71,9 +101,11 @@ while(True):
             approx = rectify(biggest)
             h = np.array([ [0,0],[639,0],[639,639],[0,639] ],np.float32)
             retval = cv2.getPerspectiveTransform(approx,h)
-            warp = cv2.warpPerspective(gray,retval,(450,450))
+            warp = cv2.warpPerspective(img,retval,(640,640))
             cv2.imshow('warp',warp)
             warped = True
+            default_matrix = pValues(warp)
+            
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
